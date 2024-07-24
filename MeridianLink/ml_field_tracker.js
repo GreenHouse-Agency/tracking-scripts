@@ -24,9 +24,8 @@
 
 class Application {
   constructor(type, collectFields) {
-    const collectFields = collectFields;
-
-    this.trackFields = collectFields[type];
+    this.collectFields = collectFields;
+    this.trackFields = this.collectFields[type];
 
     const mlInputFields = Array.from(document.getElementsByTagName("input"));
     const mlSelectFields = Array.from(document.getElementsByTagName("select"));
