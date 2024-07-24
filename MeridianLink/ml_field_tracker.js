@@ -23,8 +23,8 @@
 'use strict';
 
 class Application {
-  constructor(type, gtmContainer) {
-    const collectFields = google_tag_manager[gtmContainer].dataLayer.get('collectFields');
+  constructor(type, collectFields) {
+    const collectFields = collectFields;
 
     this.trackFields = collectFields[type];
 
@@ -58,11 +58,11 @@ class Application {
   }
 }
 
-function initApplication(gtmContainer) {
+function initApplication(collectFields) {
   const loanType = document.getElementById("hdnLoanType");
   const busLoanType = document.getElementById("hdBusinessLoanType");
   const appType = loanType ? loanType.value : busLoanType.value;
 
   // init accordions
-  new Application(appType, gtmContainer);
+  new Application(appType, collectFields);
 };
