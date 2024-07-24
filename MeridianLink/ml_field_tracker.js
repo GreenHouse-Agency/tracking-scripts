@@ -41,7 +41,6 @@ class Application {
         "fields": this.fields
       }
     });
-    console.log("initial dataLayer push for application");
 
     // add event listener for each field
     this.fields.forEach((field) => {
@@ -64,9 +63,15 @@ class Application {
 }
 
 function initApplication(collectFields) {
-  const loanType = document.getElementById("hdnLoanType");
-  const busLoanType = document.getElementById("hdBusinessLoanType");
-  const appType = loanType ? loanType.value : busLoanType.value;
+  var loanType = document.getElementById("hdnLoanType");
+  var busLoanType = document.getElementById("hdBusinessLoanType");
+  var appType;
+
+  if (loanType) {
+    appType = busLoanType.value;
+  } else if (busLoanType) {
+    appType = busLoanType.value;
+  }
 
   // init accordions
   new Application(appType, collectFields);
