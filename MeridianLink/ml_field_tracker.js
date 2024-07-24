@@ -41,6 +41,7 @@ class Application {
         "fields": this.fields
       }
     });
+    console.log("initial dataLayer push for application");
 
     // add event listener for each field
     this.fields.forEach((field) => {
