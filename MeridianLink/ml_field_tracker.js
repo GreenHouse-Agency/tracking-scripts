@@ -37,6 +37,11 @@ class Application {
       "node": node,
       "value": node.value
     }));
+    dataLayer.push({'application': 
+      {
+        "fields": this.fields
+      }
+    });
 
     // add event listener for each field
     this.fields.forEach((field) => {
