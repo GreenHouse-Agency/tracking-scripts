@@ -1,0 +1,460 @@
+[
+    {
+      "productName": "",
+      "depositAmount": 5,
+      "productQuestions": [
+        {
+          "AnswerType": "DROPDOWN",
+          "AppSource": "",
+          "IsActive": true,
+          "IsAvailableToConsumer": true,
+          "IsRequired": true,
+          "IsViewableUntilLocked": false,
+          "Position": 12,
+          "QuestionName": "Estatements",
+          "QuestionText": "",
+          "RequireConfirmation": false,
+          "ConfirmationText": "",
+          "max_value": "",
+          "min_value": "",
+          "reg_expression": "",
+          "errorMessage": "",
+          "XAProductQuestionID": "178faa4a-4740-45fa-b9f2-e90d54d5924b",
+          "productAnswerText": "",
+          "numberIdx": 0,
+          "RestrictedAnswers": [
+            {
+              "Text": "",
+              "Value": "",
+              "Position": 0,
+              "isSelected": false
+            },
+            {
+              "Text": "Yes",
+              "Value": "Yes",
+              "Position": 1,
+              "isSelected": true
+            },
+            {
+              "Text": "No",
+              "Value": "No",
+              "Position": 2,
+              "isSelected": false
+            }
+          ],
+          "Hidden": false
+        }
+      ],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "SAVINGS",
+      "productCode": "SV1",
+      "count": 1,
+      "productId": "SV1_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 0,
+      "productQuestions": [],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "SAVINGS",
+      "productCode": "SV4",
+      "count": 1,
+      "productId": "SV4_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 0,
+      "productQuestions": [],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "SAVINGS",
+      "productCode": "SV6",
+      "count": 1,
+      "productId": "SV6_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 0,
+      "productQuestions": [],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "SAVINGS",
+      "productCode": "SV7",
+      "count": 1,
+      "productId": "SV7_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 25,
+      "productQuestions": [
+        {
+          "AnswerType": "DROPDOWN",
+          "AppSource": "",
+          "IsActive": true,
+          "IsAvailableToConsumer": true,
+          "IsRequired": true,
+          "IsViewableUntilLocked": false,
+          "Position": 5,
+          "QuestionName": "ODP savings",
+          "QuestionText": "",
+          "RequireConfirmation": false,
+          "ConfirmationText": "",
+          "max_value": "",
+          "min_value": "",
+          "reg_expression": "",
+          "errorMessage": "",
+          "XAProductQuestionID": "94ea615d-6389-41f8-acb3-2698a573e364",
+          "productAnswerText": "",
+          "numberIdx": 0,
+          "RestrictedAnswers": [
+            {
+              "Text": "",
+              "Value": "",
+              "Position": 0,
+              "isSelected": false
+            },
+            {
+              "Text": "Yes",
+              "Value": "Yes",
+              "Position": 1,
+              "isSelected": true
+            },
+            {
+              "Text": "No",
+              "Value": "No",
+              "Position": 2,
+              "isSelected": false
+            }
+          ],
+          "Hidden": false
+        },
+        {
+          "AnswerType": "DROPDOWN",
+          "AppSource": "",
+          "IsActive": true,
+          "IsAvailableToConsumer": true,
+          "IsRequired": true,
+          "IsViewableUntilLocked": false,
+          "Position": 6,
+          "QuestionName": "ODS",
+          "QuestionText": "",
+          "RequireConfirmation": false,
+          "ConfirmationText": "",
+          "max_value": "",
+          "min_value": "",
+          "reg_expression": "",
+          "errorMessage": "",
+          "XAProductQuestionID": "d749b31c-ece5-4ac4-a6ab-77fbcbb78ddf",
+          "productAnswerText": "",
+          "numberIdx": 0,
+          "RestrictedAnswers": [
+            {
+              "Text": "",
+              "Value": "",
+              "Position": 0,
+              "isSelected": false
+            },
+            {
+              "Text": "Yes",
+              "Value": "Yes",
+              "Position": 1,
+              "isSelected": true
+            },
+            {
+              "Text": "No",
+              "Value": "No",
+              "Position": 2,
+              "isSelected": false
+            }
+          ],
+          "Hidden": false
+        },
+        {
+          "AnswerType": "DROPDOWN",
+          "AppSource": "",
+          "IsActive": true,
+          "IsAvailableToConsumer": true,
+          "IsRequired": true,
+          "IsViewableUntilLocked": false,
+          "Position": 7,
+          "QuestionName": "Debit Card",
+          "QuestionText": "",
+          "RequireConfirmation": false,
+          "ConfirmationText": "",
+          "max_value": "",
+          "min_value": "",
+          "reg_expression": "",
+          "errorMessage": "",
+          "XAProductQuestionID": "5315d9d0-2672-47b1-be06-13895f40465c",
+          "productAnswerText": "",
+          "numberIdx": 0,
+          "RestrictedAnswers": [
+            {
+              "Text": "",
+              "Value": "",
+              "Position": 0,
+              "isSelected": false
+            },
+            {
+              "Text": "Yes - Primary Only",
+              "Value": "Yes - Primary Only",
+              "Position": 1,
+              "isSelected": false
+            },
+            {
+              "Text": "Yes - All Signers",
+              "Value": "Yes - All Signers",
+              "Position": 2,
+              "isSelected": true
+            },
+            {
+              "Text": "No",
+              "Value": "No",
+              "Position": 3,
+              "isSelected": false
+            }
+          ],
+          "Hidden": false
+        },
+        {
+          "AnswerType": "DROPDOWN",
+          "AppSource": "",
+          "IsActive": true,
+          "IsAvailableToConsumer": true,
+          "IsRequired": true,
+          "IsViewableUntilLocked": false,
+          "Position": 9,
+          "QuestionName": "Boost",
+          "QuestionText": "",
+          "RequireConfirmation": false,
+          "ConfirmationText": "",
+          "max_value": "",
+          "min_value": "",
+          "reg_expression": "",
+          "errorMessage": "",
+          "XAProductQuestionID": "68138274-11ce-4396-a46f-c0ca045c9f3a",
+          "productAnswerText": "",
+          "numberIdx": 0,
+          "RestrictedAnswers": [
+            {
+              "Text": "",
+              "Value": "",
+              "Position": 0,
+              "isSelected": false
+            },
+            {
+              "Text": "Yes",
+              "Value": "Yes",
+              "Position": 1,
+              "isSelected": true
+            },
+            {
+              "Text": "No",
+              "Value": "No",
+              "Position": 2,
+              "isSelected": false
+            }
+          ],
+          "Hidden": false
+        },
+        {
+          "AnswerType": "DROPDOWN",
+          "AppSource": "",
+          "IsActive": true,
+          "IsAvailableToConsumer": true,
+          "IsRequired": true,
+          "IsViewableUntilLocked": false,
+          "Position": 11,
+          "QuestionName": "Checks",
+          "QuestionText": "",
+          "RequireConfirmation": false,
+          "ConfirmationText": "",
+          "max_value": "",
+          "min_value": "",
+          "reg_expression": "",
+          "errorMessage": "",
+          "XAProductQuestionID": "54f88be2-7479-4483-8617-960643e8d3e0",
+          "productAnswerText": "",
+          "numberIdx": 0,
+          "RestrictedAnswers": [
+            {
+              "Text": "",
+              "Value": "",
+              "Position": 0,
+              "isSelected": false
+            },
+            {
+              "Text": "Yes",
+              "Value": "Yes",
+              "Position": 1,
+              "isSelected": true
+            },
+            {
+              "Text": "No",
+              "Value": "No",
+              "Position": 2,
+              "isSelected": false
+            }
+          ],
+          "Hidden": false
+        }
+      ],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "CHECKING",
+      "productCode": "CK1",
+      "count": 1,
+      "productId": "CK1_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 0,
+      "productQuestions": [
+        {
+          "AnswerType": "DROPDOWN",
+          "AppSource": "",
+          "IsActive": true,
+          "IsAvailableToConsumer": true,
+          "IsRequired": true,
+          "IsViewableUntilLocked": false,
+          "Position": 7,
+          "QuestionName": "Debit Card",
+          "QuestionText": "",
+          "RequireConfirmation": false,
+          "ConfirmationText": "",
+          "max_value": "",
+          "min_value": "",
+          "reg_expression": "",
+          "errorMessage": "",
+          "XAProductQuestionID": "5315d9d0-2672-47b1-be06-13895f40465c",
+          "productAnswerText": "",
+          "numberIdx": 0,
+          "RestrictedAnswers": [
+            {
+              "Text": "",
+              "Value": "",
+              "Position": 0,
+              "isSelected": false
+            },
+            {
+              "Text": "Yes - Primary Only",
+              "Value": "Yes - Primary Only",
+              "Position": 1,
+              "isSelected": false
+            },
+            {
+              "Text": "Yes - All Signers",
+              "Value": "Yes - All Signers",
+              "Position": 2,
+              "isSelected": true
+            },
+            {
+              "Text": "No",
+              "Value": "No",
+              "Position": 3,
+              "isSelected": false
+            }
+          ],
+          "Hidden": false
+        }
+      ],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "MONEY_MARKET",
+      "productCode": "MM1",
+      "count": 1,
+      "productId": "MM1_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 500,
+      "productQuestions": [],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "CD",
+      "productCode": "CD1",
+      "count": 1,
+      "productId": "CD1_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 500,
+      "productQuestions": [],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "CD",
+      "productCode": "CD2",
+      "count": 1,
+      "productId": "CD2_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 500,
+      "productQuestions": [],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "CD",
+      "productCode": "CD3",
+      "count": 1,
+      "productId": "CD3_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 500,
+      "productQuestions": [],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "CD",
+      "productCode": "CD4",
+      "count": 1,
+      "productId": "CD4_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 500,
+      "productQuestions": [],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "CD",
+      "productCode": "CD5",
+      "count": 1,
+      "productId": "CD5_0"
+    },
+    {
+      "productName": "",
+      "depositAmount": 500,
+      "productQuestions": [],
+      "productServices": [],
+      "productRate": "",
+      "term": 0,
+      "apy": 0,
+      "accountType": "CD",
+      "productCode": "CD6",
+      "count": 1,
+      "productId": "CD6_0"
+    }
+]
