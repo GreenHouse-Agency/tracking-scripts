@@ -1,6 +1,8 @@
 export default class Application {
 
   constructor(type) {
+    // TODO: Update locator, objectLocator, objectPropertyName, and selector 
+    // based on the location of each field in the POS.
     this.fields = {
       "application_session_id": {
         "type": "string",
@@ -8,7 +10,7 @@ export default class Application {
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
-        "value": this.createPersistentId()
+        "value": null
       },
       "application_pseudo_id": {
         "type": "string",
@@ -23,7 +25,7 @@ export default class Application {
         "locator": "query",
         "objectLocation": null,
         "objectPropertyName": null,
-        "selector": "hdloanDtl",
+        "selector": "#hdloanDtl",
         "value": null
       },
       "application_type": {
@@ -36,7 +38,8 @@ export default class Application {
       },
       "first_name": {
         "type": "string",
-        "locator": "object",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "FirstName",
         "selector": null,
@@ -44,7 +47,8 @@ export default class Application {
       },
       "last_name": {
         "type": "string",
-        "locator": "object",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "LastName",
         "selector": null,
@@ -52,39 +56,44 @@ export default class Application {
       },
       "email": {
         "type": "string",
-        "locator": "object",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "EmailAddr",
         "selector": null,
         "value": null
       },
       "cell_phone": {
-        "type": "string",
-        "locator": "object",
+        "type": "phone",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "MobilePhone",
         "selector": null,
         "value": null
       },
       "home_phone": {
-        "type": "string",
-        "locator": "object",
+        "type": "phone",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "HomePhone",
         "selector": null,
         "value": null
       },
       "work_phone": {
-        "type": "string",
-        "locator": "object",
+        "type": "phone",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "WorkPhone",
         "selector": null,
         "value": null
       },
       "preferred_contact_method": {
-        "type": "string",
-        "locator": "object",
+        "type": "dropdown",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "ContactMethod",
         "selector": null,
@@ -96,10 +105,10 @@ export default class Application {
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": "#txtTotalDeposit, #txtRequestCreditLimit, #txtLoanAmount, #txtLoanRequestAmount, #txtProposedLoanAmount",
-        "value": this.getAmount()
+        "value": null
       },
       "finish_later": {
-        "type": "string",
+        "type": "bool",
         "locator": "default",
         "objectLocation": null,
         "objectPropertyName": null,
@@ -107,23 +116,25 @@ export default class Application {
         "value": null
       },
       "new_member_application": {
-        "type": "string",
-        "locator": "object",
+        "type": "bool",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "type",
         "selector": null,
         "value": null
       },
       "youth_account": {
-        "type": "string",
-        "locator": "object",
+        "type": "bool",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "saAccountCode",
         "selector": null,
         "value": null
       },
       "business_application": {
-        "type": "string",
+        "type": "bool",
         "locator": "default",
         "objectLocation": null,
         "objectPropertyName": null,
@@ -131,24 +142,26 @@ export default class Application {
         "value": null
       },
       "line_of_credit": {
-        "type": "string",
+        "type": "bool",
         "locator": "query",
         "objectLocation": null,
         "objectPropertyName": null,
-        "selector": "hdIsLineOfCredit",
+        "selector": "#hdIsLineOfCredit",
         "value": null
       },
       "eligibility": {
         "type": "string",
-        "locator": "object",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "FOMName",
         "selector": null,
         "value": null
       },
       "deposit_products": {
-        "type": "string",
-        "locator": "object",
+        "type": "enum",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "SelectedProducts",
         "selector": null,
@@ -156,7 +169,8 @@ export default class Application {
       },
       "application_purpose": {
         "type": "string",
-        "locator": "object",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "LoanPurpose",
         "selector": null,
@@ -164,7 +178,8 @@ export default class Application {
       },
       "credit_card_name": {
         "type": "string",
-        "locator": "object",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "CreditCardName",
         "selector": null,
@@ -172,11 +187,21 @@ export default class Application {
       },
       "vehicle_type": {
         "type": "string",
-        "locator": "object",
+        "locator": "function",
+				"function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "VehicleType",
         "selector": null,
         "value": null
+      },
+      "furthest_step_viewed": {
+        "type": "string",
+        "locator": "function",
+				"function": "currentURL",
+        "objectLocation": "root",
+        "objectPropertyName": "stage",
+        "selector": null,
+        "value": "Product Information"
       },
       "hs_utm_campaign": {
         "type": "string",
@@ -221,25 +246,39 @@ export default class Application {
     }
 
     this.appType = type;
+    // TODO: Update the portal ID to match the HubSpot portal ID for MeridianLink
     this.portalID = "";
     this.customEventName = `pe${this.portalID}_online_application_progress`;
+    
     this.cookieName = 'persistent_id_' + this.appType;
     this.contactIdentified = false;
 
     // Create persistent ID and set cookie
-    this.createPersistentId();
+    this.setPersistentId();
 
     // Initialize Fields property values with query parameters
-    this.queryParamterPrefill();
+    this.queryParameterPrefill();
 
     // Start interval to update field values every minute
-    setInterval(
+    this.intervalID = setInterval(
         this.updateFieldValues.bind(this),
         60000
     );
 
     // Create event listener for next button
     this.createNextButtonEventListener();
+
+    // CUSTOM (MeridianLink): DOM Observer event listener for Application Number
+    const domObserver = new MutationObserver((_mutationList, observer) => {
+      const appNumber = document.getElementById('hdloanDtl');
+    
+      if (appNumber) {
+        this.updateFieldValues();
+
+        observer.disconnect();
+      }
+    });
+    domObserver.observe(document.body, { childList: true, subtree: true });
   }
 
   /***********************************/
@@ -254,7 +293,7 @@ export default class Application {
   // Returnes the persistent ID based on the application type
   // If the persistent ID and cookie does not exist, it creates a new one
   createPersistentId() {
-    const persistentID = this.getCookie();
+    let persistentID = this.getCookie();
 
     if (!persistentID) {
       if (this.appType !== 'unknown') {
@@ -278,10 +317,11 @@ export default class Application {
 
   // Creates a persistent ID cookie with the application type ID and a random UUID
   setPersistentIDCookie(applicationTypeID) {
-    const persistentID = applicationTypeID + "-" + self.crypto.randomUUID();
+    const persistentID = applicationTypeID + "-" + window.crypto.randomUUID();
     const expires = "expires=Fri, 31 Dec 9999 23:59:59 GMT";
-
-    document.cookie = this.cookieName + "=" + encodeURIComponent(persistentID) + "; path=/; " + expires + "; SameSite=Lax";
+    const secure = location.protocol === 'https:' ? "; Secure" : "";
+    
+    document.cookie = this.cookieName + "=" + encodeURIComponent(persistentID) + "; path=/; " + expires + "; SameSite=Lax" + secure;
     
     return persistentID;
   }
@@ -296,11 +336,11 @@ export default class Application {
   /*********************************************/
 
   // Maps query parameter values to field property values based on matching key and query paramter names
-  queryParamterPrefill() {
+  queryParameterPrefill() {
     const utmParams = new URLSearchParams(window.location.search);
 
-    for (const [key, value] of Object.entries(this.fields)) {
-      if(this.fields.hasOwn(key)) {
+    for (const [key, value] of Object.entries(utmParams)) {
+      if(key in this.fields) {
         this.fields[key].value = value;
       }
     };
@@ -315,24 +355,37 @@ export default class Application {
   /*** Start Update Field Value Methods ***/
   /****************************************/
   updateFieldValues() {
+    var fieldsUpdated = false;
+    var emailUpdated = false;
+
     for (const [key, field] of Object.entries(this.fields)) {
       const oldValue = field.value;
-      const newValue = this.getFieldValue(field);
+      let newValue = this.getFieldValue(field);
+
+      // CUSTOM (MeridianLink): If the key is "youth_account", map the value from "MINOR" to "Yes"
+      if (key === "youth_account" && newValue === "MINOR") {
+        newValue = "Yes";
+      }
 
       // if the value has changed and the new value is not null or undefined, update the field value
-      if (newValue !== null && newValue !== undefined && newValue !== oldValue) {
-        field.value = this.formatFieldValue(newValue);
+      if (newValue !== null && newValue !== undefined && newValue !== "" && newValue !== oldValue) {
+        field.value = newValue;
 
         // If the field is an email and the email is known, identify the HubSpot contact
         if (key == "email" && !this.contactIdentified) {
-          this.identifyHubSpotContact();
+          emailUpdated = true;
         }
+
+        fieldsUpdated = true;
       }
     };
 
-    if (this.emailKnown()) {
+    if (emailUpdated) {
+      this.identifyHubSpotContact();
+    }
+
+    if (this.contactIdentified && fieldsUpdated) {
       if (this.appSubmitted()) {
-        this.resetPersistentId();
         this.createPseudoId();
         this.sendCustomEvent();
         this.closeApplication();
@@ -346,34 +399,95 @@ export default class Application {
   // If the field is an object, it retrieves the value from the object property
   // If the field is a query, it retrieves the value from a querySelector
   getFieldValue(field) {
-    let value = null;
+    var value = null;
+    var object = null;
 
-    if (field.locator === "object") {
-      if (field.objectLocation && field.objectPropertyName) {
-        const object = window[field.objectLocation];
-        if (object && object.hasOwnProperty(field.objectPropertyName)) {
+    if (field.locator === "function" || field.locator === "object") {
+      if (field.locator === "function") {
+        if (typeof window[field.function] === "function") {
+          object = window[field.function]();
+        } else if (typeof field.function === "function") {
+          object = this.executeFunction(field.function);
+        } else {
+          console.warn(`Function ${field.function} not found.`);
+        }
+      } else if (object || field.locator === "object") {
+        if (field.objectLocation && field.objectPropertyName) {
+          object = window[field.objectLocation] || field.objectLocation;
+        }
+      } 
+
+      if (object && field.objectPropertyName in object) {
+        // CUSTOM (MeridianLink): If the objectPropertyName is SelectedProducts, parse the JSON string to an array and map it to an array of productCodes
+        // If the objectPropertyName is stage, compare the old value to the new value and choose the value with greatest value as determined by the
+        // stagePath object.
+        if (field.objectPropertyName === "SelectedProducts" && typeof object[field.objectPropertyName] === "string") {
+          try {
+            value = JSON.parse(object[field.objectPropertyName]).map(product => product.productCode);
+          } catch (error) {
+            console.error(`Error parsing SelectedProducts: ${error}`);
+            value = null;
+          }
+        } else if (field.objectPropertyName === "stage" && typeof object[field.objectPropertyName] === "string") {
+          // TODO: Update the stagePath object to match the stages in the online application
+          let stagePath = {
+            "Product Information": 1,
+            "Applicant Information": 2,
+            "Review and Submit": 3,
+            "Application Completed": 4
+          }
+
+          const oldValue = this.fields.furthest_step_viewed.value;
+          const newValue = object[field.objectPropertyName];
+          if (stagePath[newValue] > stagePath[oldValue]) {
+            value = newValue;
+          } else {
+            value = oldValue;
+          }
+        } else {
           value = object[field.objectPropertyName];
         }
       }
     } else if (field.locator === "query") {
       const element = document.querySelector(field.selector);
+
       if (element) {
         value = element.value || element.innerText;
       }
     }
 
-    return value;
+    return this.formatFieldValue(value, field.type);
   }
 
-  formatFieldValue(field) {
-    let value = field.value;
+  // TODO: Update functions to exexute
+  // This is used to execute funcitons that do not exist in the window object
+  executeFunction(func) {
+    if (func === "getCurrentAppInfo") {
+      // Assuming getCurrentAppInfo is a function that returns the current application info
+      return getCurrentAppInfo();
+    } else if (func === "currentURL") {
+      // Assuming currentURL is a function that returns the current URL
+      return currentURL().trackedURL;
+    }
+  }
 
-    if (field.type === "number") {
-      value = this.convertToNumber(value);
-    } else if (field.type === "bool") {
-      value = this.convertToBool(value);
-    } else if (field.type === "string" && Array.isArray(value)) {
-      value = this.convertToEnum(value);
+  formatFieldValue(value, type) {
+    
+    if (value) {
+      if (type === "number") {
+        value = this.convertToNumber(value);
+      } else if (type === "bool") {
+        value = this.convertToBool(value);
+      } else if (type === "enum") {
+        value = this.convertToEnum(value);
+      } else if (type === "dropdown") {
+        value = value.toString().trim().toLowerCase();
+      } else if (type === "string") {
+        value = this.titleCase(value.toString().trim());
+      } else if (type === "phone") {
+        // Assuming phone numbers are formatted as strings
+        value = "+1" + value.toString().replace(/\D/g, ''); // Remove non-digit characters
+      }
     }
 
     return value;
@@ -381,22 +495,28 @@ export default class Application {
 
   // Helper function to convert a string to a number, or return null if conversion fails
   convertToNumber(value) {
-      if (typeof value === 'string') {
-          // Remove any extra spaces and potential dollar signs or commas
-          value = value.replace(/^\$\s*/, '').replace(/,/g, '');
-      }
-      var parsedNumber = parseFloat(value);
-      return isNaN(parsedNumber) ? null : parsedNumber;
+    var newValue = null;
+
+    if (value && typeof value === 'string') {
+      // Remove any extra spaces and potential dollar signs or commas
+      newValue = parseFloat(value.replace(/^\$\s*/, '').replace(/,/g, ''));
+    }
+
+    return isNaN(newValue) ? null : newValue;
   }
 
   // Helper function to convert a string to a number, or return null if conversion fails
   convertToBool(value) {
-    var newValue = value.toString().toLowerCase();
+    var newValue = null;
 
-    if (newValue === "true" || newValue === "1" || newValue === "yes" || newValue === "y") {
-      newValue = "Yes";
-    } else {
-      newValue = "No";
+    if (value) {
+      var newValue = value.toString().toLowerCase();
+
+      if (newValue === "true" || newValue === "1" || newValue === "yes" || newValue === "y") {
+        newValue = "true";
+      } else {
+        newValue = "false";
+      }
     }
 
     return newValue;
@@ -405,6 +525,7 @@ export default class Application {
   // Helper function to convert an array to a semicolon delimitted list, or return null if conversion fails
   convertToEnum(array) {
     var newValue = null;
+
     if (Array.isArray(array)) {
       // Reduce porudct array to string of product codes
       const initialValue = "";
@@ -418,37 +539,36 @@ export default class Application {
     return newValue;
   }
 
+  titleCase(string) {
+    if (!string) return string;
+    return string.toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
   identifyHubSpotContact () {
     var _hsq = window._hsq = window._hsq || [];
-    var email = this.getEmail();
-    var first_name = this.fields.find((field) => field.eventPropertyName == "first_name").value;
-    var last_name = this.fields.find((field) => field.eventPropertyName == "last_name").value;
+    var email = this.fields.email.value;
+    var first_name = this.fields.first_name.value;
+    var last_name = this.fields.last_name.value;
 
     _hsq.push(["identify",{
         email: email,
         firstname: first_name,
         lastname: last_name
     }]); 
-  }
 
-  emailKnown() {
-    let email = this.fields.email.value;
-
-    if (email && typeof email === "string" && email.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+    this.contactIdentified = true;
   }
 
   appSubmitted() {
-    const currentURL = this.getCurrentURL();
+    // TODO: Update this logic to determine if the application has been submitted
+    // This is a placeholder logic that checks if the current URL contains "decision" or "referral"
+    // This logic may need to be updated based on the actual application flow
+    const currentURL = this.executeFunction("currentURL");
 
-    return currentURL.includes("decision") || currentURL.includes("referral");
-  }
-
-  getCurrentURL() {
-    return window.location.href;
+    return currentURL.includes("application-completed");
   }
 
   resetPersistentId() {
@@ -467,9 +587,40 @@ export default class Application {
     this.fields.application_pseudo_id.value = pseudoId;
   }
 
+  closeApplication() {
+    this.resetPersistentId();
+    clearInterval(this.intervalID)
+  }
+
   /**************************************/
   /*** End Update Field Value Methods ***/
   /**************************************/
+
+
+
+  /***************************************/
+  /*** Start Next Button Event Methods ***/
+  /***************************************/
+
+  createNextButtonEventListener() {
+    // TODO: Update the selector to match the next button in the POS
+    const nextButton = document.querySelectorAll(".div-continue-button");
+    if (nextButton.length > 0) {
+      nextButton.forEach(button => {
+        button.addEventListener("click", this.handleNextButtonClick.bind(this));
+      });
+    } else {
+      console.warn("Next button not found. Please check the selector.");
+    }
+  }
+
+  handleNextButtonClick(event) {
+    // Update field values
+    this.updateFieldValues();
+  }
+  /*************************************/
+  /*** End Next Button Event Methods ***/
+  /*************************************/
 
 
 
@@ -478,10 +629,11 @@ export default class Application {
   /**********************************/
   sendCustomEvent() {    
     var _hsq = window._hsq = window._hsq || [];
+    const properties = this.getCustomEventProperties();
 
     _hsq.push(["trackCustomBehavioralEvent", {
         name: this.customEventName,
-        properties: this.getCustomEventProperties()
+        properties: properties
     }]);
   }
 
@@ -503,8 +655,13 @@ export default class Application {
 }
 
 export function initApplication() {
-  var loanType = document.getElementById("hdnLoanType") || document.getElementById("hdLoanType");
-  var mapAppType = {
+
+  // TODO: Update DOM selector to obtain application type.
+  // TODO: Update mapAppType keys to match internal application type names.
+  let loanType = document.getElementById("hdnLoanType") || document.getElementById("hdLoanType");
+  if (!loanType) return null;
+
+  let mapAppType = {
     "1": "consumer_deposit",
     "2": "consumer_loan",
     "3": "consumer_vehicle",
@@ -519,7 +676,7 @@ export function initApplication() {
     "12": "commercial_real_estate"
   };
 
-  appType = mapAppType[loanType.value];
+  let appType = mapAppType[loanType.value];
 
   if (appType) {
     return new Application(appType);
