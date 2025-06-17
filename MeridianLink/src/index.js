@@ -1,12 +1,13 @@
 export default class Application {
 
   constructor(type) {
-    // TODO: Update locator, objectLocator, objectPropertyName, and selector 
+    // TODO: Update locator, function, objectLocation, objectPropertyName, and selector 
     // based on the location of each field in the POS.
     this.fields = {
       "application_session_id": {
         "type": "string",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -15,6 +16,7 @@ export default class Application {
       "application_pseudo_id": {
         "type": "string",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -23,6 +25,7 @@ export default class Application {
       "application_id": {
         "type": "string",
         "locator": "query",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": "#hdloanDtl",
@@ -31,6 +34,7 @@ export default class Application {
       "application_type": {
         "type": "string",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -102,6 +106,7 @@ export default class Application {
       "amount": {
         "type": "number",
         "locator": "query",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": "#txtTotalDeposit, #txtRequestCreditLimit, #txtLoanAmount, #txtLoanRequestAmount, #txtProposedLoanAmount",
@@ -110,6 +115,7 @@ export default class Application {
       "finish_later": {
         "type": "bool",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -136,6 +142,7 @@ export default class Application {
       "business_application": {
         "type": "bool",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -144,6 +151,7 @@ export default class Application {
       "line_of_credit": {
         "type": "bool",
         "locator": "query",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": "#hdIsLineOfCredit",
@@ -206,6 +214,7 @@ export default class Application {
       "hs_utm_campaign": {
         "type": "string",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -214,6 +223,7 @@ export default class Application {
       "hs_utm_content": {
         "type": "string",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -222,6 +232,7 @@ export default class Application {
       "hs_utm_medium": {
         "type": "string",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -230,6 +241,7 @@ export default class Application {
       "hs_utm_source": {
         "type": "string",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -238,6 +250,7 @@ export default class Application {
       "hs_utm_term": {
         "type": "string",
         "locator": "default",
+        "function": null,
         "objectLocation": null,
         "objectPropertyName": null,
         "selector": null,
@@ -246,7 +259,7 @@ export default class Application {
     }
 
     this.appType = type;
-    // TODO: Update the portal ID to match the HubSpot portal ID for MeridianLink
+    // TODO: Update the portal ID to match the client HubSpot portal ID.
     this.portalID = "";
     this.customEventName = `pe${this.portalID}_online_application_progress`;
     
@@ -429,7 +442,7 @@ export default class Application {
             value = null;
           }
         } else if (field.objectPropertyName === "stage" && typeof object[field.objectPropertyName] === "string") {
-          // TODO: Update the stagePath object to match the stages in the online application
+          // TODO: Update the stagePath object to match the stages in the POS
           let stagePath = {
             "Product Information": 1,
             "Applicant Information": 2,
@@ -459,8 +472,7 @@ export default class Application {
     return this.formatFieldValue(value, field.type);
   }
 
-  // TODO: Update functions to exexute
-  // This is used to execute funcitons that do not exist in the window object
+  // TODO: Update functions to execute that do not exist in the window object
   executeFunction(func) {
     if (func === "getCurrentAppInfo") {
       // Assuming getCurrentAppInfo is a function that returns the current application info
@@ -527,7 +539,6 @@ export default class Application {
     var newValue = null;
 
     if (Array.isArray(array)) {
-      // Reduce porudct array to string of product codes
       const initialValue = "";
       newValue = array.reduce(
         (accumulator, currentValue) => accumulator + ";" + currentValue,
@@ -563,9 +574,7 @@ export default class Application {
   }
 
   appSubmitted() {
-    // TODO: Update this logic to determine if the application has been submitted
-    // This is a placeholder logic that checks if the current URL contains "decision" or "referral"
-    // This logic may need to be updated based on the actual application flow
+    // TODO: Update application submitted logic to determine if the application has been submitted.
     const currentURL = this.executeFunction("currentURL");
 
     return currentURL.includes("application-completed");
