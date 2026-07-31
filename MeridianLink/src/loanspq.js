@@ -336,7 +336,7 @@ export default class Application {
     this.appType = type;
     // TODO: Update the portal ID to match the client HubSpot portal ID.
     this.portalID = "";
-    this.customEventName = `pe${this.portalID}_meridianlink_application_progress`;
+    this.customEventName = `pe${this.portalID}_online_application_progress`;
 
     this.cookieName = "persistent_id_" + this.appType;
     this.submittedFlagCookieName = "app_submitted_" + this.appType;
