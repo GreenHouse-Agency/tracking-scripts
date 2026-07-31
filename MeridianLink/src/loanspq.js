@@ -973,12 +973,11 @@ export function initApplication() {
   // business_application field above), so nothing else needs to change if
   // that client later brings business applications online.
   let mapAppType = {
-    1: "consumer_deposit",
-    2: "consumer_loan",
-    3: "consumer_vehicle",
-    4: "consumer_credit_card",
-    5: "consumer_equity",
-    6: "consumer_real_estate",
+    XA: "consumer_deposit",
+    PL: "consumer_loan",
+    VL: "consumer_vehicle",
+    CC: "consumer_credit_card",
+    HE: "consumer_equity",
     7: "commercial_deposit",
     8: "commercial_loan",
     9: "commercial_vehicle",
