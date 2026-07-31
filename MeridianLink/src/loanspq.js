@@ -551,11 +551,6 @@ export default class Application {
       const oldValue = field.value;
       let newValue = this.getFieldValue(field);
 
-      // CUSTOM (MeridianLink): map youth deposit account identifier from "MINOR" to "Yes"
-      if (key === "youth_account" && newValue === "MINOR") {
-        newValue = "Yes";
-      }
-
       // if the value has changed and the new value is not null or undefined, update the field value
       if (
         newValue !== null &&
@@ -703,6 +698,22 @@ export default class Application {
           } else {
             value = oldValue;
           }
+        } else if (field.objectPropertyName === "saAccountCode") {
+          // BUG FIX: this must run here, on the raw value, BEFORE
+          // formatFieldValue()/convertToBool() gets it below. youth_account's
+          // type is "bool", so convertToBool() would otherwise lowercase
+          // whatever this returns (e.g. "MINOR" -> "minor") and, since "minor"
+          // doesn't match any of convertToBool()'s truthy strings ("true"/"1"/
+          // "yes"/"y"), it would always resolve to "false" — silently losing
+          // every minor-account signal. Handling the MINOR check here, on the
+          // untouched raw value, and outputting "true"/"false" directly (not
+          // "Yes"/"No") keeps this consistent with every other boolean field —
+          // see the property-type note on the other bool fields: HubSpot's
+          // single checkbox property's internal option values are lowercase
+          // "true"/"false", so that's what needs to reach the event, not a
+          // display-style "Yes"/"No" string.
+          value =
+            object[field.objectPropertyName] === "MINOR" ? "true" : "false";
         } else {
           value = object[field.objectPropertyName];
         }
