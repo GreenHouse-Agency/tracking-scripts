@@ -62,8 +62,10 @@ export default class Application {
         selector: null,
         value: null,
       },
+      // type "email" (see formatFieldValue()) just lowercases and trims,
+      // matching how email addresses should actually be normalized in HubSpot.
       email: {
-        type: "string",
+        type: "email",
         locator: "function",
         function: "getCurrentAppInfo",
         objectLocation: "root",
@@ -312,7 +314,7 @@ export default class Application {
         objectLocation: null,
         objectPropertyName: null,
         selector: null,
-        value: null,
+        value: "false",
       },
       // NEW: simple boolean flag, distinct from application_id, that flips to
       // "true" once the application is confirmed submitted (see updateFieldValues()
@@ -329,7 +331,7 @@ export default class Application {
         objectLocation: null,
         objectPropertyName: null,
         selector: null,
-        value: null,
+        value: "false",
       },
     };
 
@@ -350,11 +352,41 @@ export default class Application {
     // Application instance on future page loads (see submittedFlagCookieName
     // check below), so there's no "instance recreated mid-session" case to guard
     // against for this flag specifically.
-    this.submitted = false;
+    this.isSubmitted = false;
+    // Idempotency guard for closeApplication() — see that method's comment.
+    this.applicationClosed = false;
 
-    // Tracks the last sent event payload to guard against duplicate sends
-    // (e.g. page postbacks/reloads without a genuine field change).
-    this.lastSentPayload = null;
+    // BUG FIX: both fields previously had no explicit default (value: null in
+    // their field definitions), and getFieldValue() has no handling for
+    // locator: "default", so they always returned null until their condition
+    // became true. Since getCustomEventProperties() skips null/undefined
+    // values, this meant these fields were OMITTED from every event entirely
+    // until they flipped true, rather than being present on every event as
+    // "false" the way they were intended to be. Fixed by defaulting
+    // value: "false" directly in each field's definition above (matching the
+    // pattern used in the Reading MortgageBot implementation), rather than
+    // assigning it here — the field object literal is already fully built
+    // before any other constructor logic runs, so there's no functional
+    // difference, just a cleaner single source of truth for the default.
+
+    // BUG FIX: this.lastSentPayload was previously in-memory only, meaning the
+    // dedup guard reset to null every time a new Application instance was
+    // created (e.g. on a real page navigation, as opposed to an in-page SPA
+    // transition — confirmed happening in live client event data, where
+    // duplicate identical payloads were observed firing in quick succession).
+    // Persisting this via sessionStorage lets the guard survive across
+    // instance recreations within the same tab/session.
+    // NOTE: sessionStorage is origin-scoped, same limitation as the persistent
+    // ID cookie — this protection still breaks across a domain boundary if
+    // this client's flow spans multiple hostnames. Not a new limitation, the
+    // same one already known to apply to the session cookie itself.
+    this.lastSentPayloadStorageKey = "last_sent_payload_" + this.appType;
+    try {
+      this.lastSentPayload =
+        sessionStorage.getItem(this.lastSentPayloadStorageKey) || null;
+    } catch (error) {
+      this.lastSentPayload = null;
+    }
 
     // FIX (from Leaders lessons learned): check for an existing contact_identified
     // cookie on init. The Application instance can be recreated on a later page
@@ -532,18 +564,6 @@ export default class Application {
   /*** Start Update Field Value Methods ***/
   /****************************************/
   updateFieldValues() {
-    // Ensure contact_identified always reflects the current state
-    if (this.contactIdentified) {
-      this.fields.contact_identified.value = "true";
-    }
-
-    // Ensure submitted always reflects the current state, same pattern as
-    // contact_identified above — rides along on every event once true, not just
-    // the one event where it first flips.
-    if (this.submitted) {
-      this.fields.submitted.value = "true";
-    }
-
     var fieldsUpdated = false;
     var emailUpdated = false;
 
@@ -581,24 +601,60 @@ export default class Application {
       this.identifyHubSpotContact();
     }
 
+    // FIX (adapted from Reading MortgageBot lessons learned): recompute and
+    // resync contact_identified/submitted on EVERY pass, unconditionally —
+    // NOT gated behind whether some unrelated field also happened to change
+    // this same pass. Previously, the appSubmitted() check only ran inside
+    // `if (fieldsUpdated)` below, meaning if literally no other tracked field
+    // changed on the exact pass where appSubmitted() first became true, the
+    // flip (and the event announcing it) could be missed or delayed — this
+    // usually worked out in practice because furthest_step_viewed typically
+    // also changes on that same pass, but that was a coincidence the code was
+    // quietly relying on, not something it guaranteed. A genuine transition
+    // in either value now itself counts as a reason to mark
+    // fieldsUpdated = true, so an event fires the moment either condition is
+    // met, decoupled from whatever else did or didn't change that pass.
+    const contactIdentifiedValue = this.contactIdentified ? "true" : "false";
+    if (this.fields.contact_identified.value !== contactIdentifiedValue) {
+      this.fields.contact_identified.value = contactIdentifiedValue;
+      fieldsUpdated = true;
+    }
+
+    // FIX (from Leaders lessons learned): require both appSubmitted() AND a
+    // known application_id before closing out tracking. Closing out on
+    // appSubmitted() alone risked firing before the application number was
+    // ever captured.
+    if (
+      !this.isSubmitted &&
+      this.appSubmitted() &&
+      this.fields.application_id.value
+    ) {
+      this.isSubmitted = true;
+    }
+    const submittedValue = this.isSubmitted ? "true" : "false";
+    if (this.fields.submitted.value !== submittedValue) {
+      this.fields.submitted.value = submittedValue;
+      fieldsUpdated = true;
+    }
+
     if (fieldsUpdated) {
-      // FIX (from Leaders lessons learned): require both appSubmitted() AND a
-      // known application_id before closing out tracking. Closing out on
-      // appSubmitted() alone risked firing before the application number was
-      // ever captured.
-      if (this.appSubmitted() && this.fields.application_id.value) {
-        // Set submitted at the same point closeApplication() fires, so the final
-        // submission event carries both the application_id and this flag together.
-        // Setting this.submitted (not just the field value) ensures it keeps
-        // getting reasserted on every subsequent event via the check at the top
-        // of this function, same as contactIdentified.
-        this.submitted = true;
-        this.fields.submitted.value = "true";
+      // BUG FIX (adapted from Reading MortgageBot lessons learned): guard
+      // pseudo ID creation with "hasn't already been set" rather than relying
+      // on this branch only running once. Since submitted deliberately keeps
+      // riding along as true on any further browsing after submission (see
+      // field comment), fieldsUpdated could legitimately go true again on a
+      // later pass post-submission — without this guard, that would silently
+      // overwrite the pseudo ID's baked-in submission date on every such pass.
+      if (this.isSubmitted && !this.fields.application_pseudo_id.value) {
         this.createPseudoId();
-        this.sendCustomEvent();
+      }
+
+      this.sendCustomEvent();
+
+      // closeApplication() has its own idempotency guard (applicationClosed)
+      // for the same reason — see closeApplication() comment.
+      if (this.isSubmitted) {
         this.closeApplication();
-      } else {
-        this.sendCustomEvent();
       }
     }
   }
@@ -755,6 +811,10 @@ export default class Application {
         // casing (e.g. "HELOC" -> "Heloc"). See application_purpose field
         // comment above for full context.
         value = value.toString().trim();
+      } else if (type === "email" || type === "lowercase_string") {
+        // Lowercase + trim only — no title-casing. Used for fields that HubSpot
+        // expects to be normalized to lowercase (e.g. email addresses).
+        value = value.toString().trim().toLowerCase();
       } else if (type === "string") {
         value = this.titleCase(value.toString().trim());
       } else if (type === "phone") {
@@ -876,6 +936,18 @@ export default class Application {
   }
 
   closeApplication() {
+    // BUG FIX (adapted from Reading MortgageBot lessons learned): idempotency
+    // guard. Since submitted deliberately keeps riding along as true on any
+    // further browsing after submission, fieldsUpdated could legitimately go
+    // true again on a later pass post-submission (e.g. some other field also
+    // changes before the tab closes) — without this guard, that would
+    // re-run this method every time: redundant cookie writes and a redundant
+    // clearInterval call. Harmless individually, but not the intended
+    // behavior, and worth guarding explicitly rather than relying on
+    // coincidence.
+    if (this.applicationClosed) return;
+    this.applicationClosed = true;
+
     // FIX (from Leaders lessons learned): do NOT call resetPersistentId() here —
     // doing so wipes the session cookie, causing any subsequent page load/
     // navigation to generate a new session ID and a duplicate deal. Use a
@@ -926,11 +998,19 @@ export default class Application {
     // Dedup guard: skip sending if this exact payload was just sent. Prevents
     // duplicate workflow enrollments when the same event fires multiple times
     // in quick succession (e.g. page postbacks/reloads without a genuine field
-    // change).
+    // change). Persisted via sessionStorage (not just this.lastSentPayload in
+    // memory) so this survives a new Application instance being created on a
+    // real page navigation — see constructor note above.
     if (serialized === this.lastSentPayload) {
       return;
     }
     this.lastSentPayload = serialized;
+    try {
+      sessionStorage.setItem(this.lastSentPayloadStorageKey, serialized);
+    } catch (error) {
+      // sessionStorage unavailable (e.g. private browsing mode) — dedup guard
+      // falls back to in-memory-only protection for this instance's lifetime.
+    }
 
     var _hsq = (window._hsq = window._hsq || []);
     _hsq.push([
@@ -966,6 +1046,17 @@ export function initApplication() {
   if (!loanType) return null;
 
   // TODO: Update mapAppType keys to match internal application type names.
+  // WARNING: don't assume this is a numeric scheme (1, 2, 3...) just because
+  // the placeholder below uses numbers — this caused a real, confirmed bug on
+  // a live client implementation. MeridianLink LoansPQ's hdLoanType/
+  // hdnLoanType DOM value is commonly a short STRING code instead (e.g. XA,
+  // PL, VL, CC, HE) depending on the client's specific setup. If the keys
+  // here don't match the actual runtime value's type/format exactly,
+  // mapAppType[loanType.value] will silently miss every time and
+  // initApplication() will always return null — with no error, just quietly
+  // never initializing. Confirm the actual live value (e.g. via console:
+  // document.getElementById("hdnLoanType").value) before assuming either
+  // convention.
   // NOTE: if this client does not offer business/commercial applications
   // online, the commercial_* entries below will simply never resolve to a
   // match (no live loanType value routes to them) — that's fine, leave them
@@ -978,6 +1069,7 @@ export function initApplication() {
     VL: "consumer_vehicle",
     CC: "consumer_credit_card",
     HE: "consumer_equity",
+    6: "consumer_real_estate",
     7: "commercial_deposit",
     8: "commercial_loan",
     9: "commercial_vehicle",
