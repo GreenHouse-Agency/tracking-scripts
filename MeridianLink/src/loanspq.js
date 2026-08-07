@@ -369,24 +369,17 @@ export default class Application {
     // before any other constructor logic runs, so there's no functional
     // difference, just a cleaner single source of truth for the default.
 
-    // BUG FIX: this.lastSentPayload was previously in-memory only, meaning the
-    // dedup guard reset to null every time a new Application instance was
-    // created (e.g. on a real page navigation, as opposed to an in-page SPA
-    // transition — confirmed happening in live client event data, where
-    // duplicate identical payloads were observed firing in quick succession).
-    // Persisting this via sessionStorage lets the guard survive across
-    // instance recreations within the same tab/session.
-    // NOTE: sessionStorage is origin-scoped, same limitation as the persistent
-    // ID cookie — this protection still breaks across a domain boundary if
-    // this client's flow spans multiple hostnames. Not a new limitation, the
-    // same one already known to apply to the session cookie itself.
-    this.lastSentPayloadStorageKey = "last_sent_payload_" + this.appType;
-    try {
-      this.lastSentPayload =
-        sessionStorage.getItem(this.lastSentPayloadStorageKey) || null;
-    } catch (error) {
-      this.lastSentPayload = null;
-    }
+    // Tracks the last sent event payload to guard against duplicate sends
+    // (e.g. page postbacks/reloads without a genuine field change). Plain
+    // in-memory, matching the pattern used in Leaders and Reading MortgageBot
+    // — no sessionStorage layer. That extra persistence was tried on a live
+    // client implementation to compensate for a suspected
+    // multiple-concurrent-instances problem, but the singleton guard in
+    // initApplication() prevents that scenario directly, so the
+    // sessionStorage complexity isn't needed: with only ever one instance per
+    // page load, there's nothing for it to guard against that plain
+    // in-memory tracking doesn't already handle.
+    this.lastSentPayload = null;
 
     // FIX (from Leaders lessons learned): check for an existing contact_identified
     // cookie on init. The Application instance can be recreated on a later page
@@ -965,15 +958,34 @@ export default class Application {
   /***************************************/
 
   createNextButtonEventListener() {
-    // TODO: Update the selector to match the next button in the POS.
-    const nextButton = document.querySelectorAll(".div-continue-button");
-    if (nextButton.length > 0) {
-      nextButton.forEach((button) => {
-        button.addEventListener("click", this.handleNextButtonClick.bind(this));
-      });
-    } else {
-      console.warn("Next button not found. Please check the selector.");
-    }
+    // TODO: Update the selector to match the next/continue button in the POS.
+    //
+    // Uses a single delegated listener on document (matching the pattern
+    // used in the Reading MortgageBot implementation) rather than
+    // querySelectorAll + forEach + addEventListener on specific elements.
+    // Reading's stated reason was AngularJS re-rendering the DOM on every
+    // route change, meaning direct listeners couldn't be attached once and
+    // expected to survive — but delegation is a good default regardless of
+    // platform, since it structurally can't stack duplicate listeners on a
+    // given element no matter the cause. Leaders' implementation hit the
+    // same "many identical sends from one click" symptom via a different
+    // mechanism (repeated listener re-registration from inside a
+    // MutationObserver callback) — delegation avoids that entire class of
+    // bug by construction.
+    //
+    // TODO: confirm whether this client's "next" button selector is also
+    // used by unrelated elements (e.g. popup/modal dialog buttons) —
+    // confirmed happening on a live client implementation, where the same
+    // class was reused on "OK"/"Remove"/"Cancel" buttons inside confirmation
+    // dialogs. If so, scope the closest() check below to a container that
+    // only wraps the real navigation button (e.g. a footer/nav element) so
+    // dismissing a dialog isn't misread as advancing to the next step.
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest(".div-continue-button");
+      if (button) {
+        this.handleNextButtonClick(event);
+      }
+    });
   }
 
   handleNextButtonClick(event) {
@@ -997,20 +1009,14 @@ export default class Application {
 
     // Dedup guard: skip sending if this exact payload was just sent. Prevents
     // duplicate workflow enrollments when the same event fires multiple times
-    // in quick succession (e.g. page postbacks/reloads without a genuine field
-    // change). Persisted via sessionStorage (not just this.lastSentPayload in
-    // memory) so this survives a new Application instance being created on a
-    // real page navigation — see constructor note above.
+    // in quick succession (e.g. page postbacks/reloads without a genuine
+    // field change). Plain in-memory comparison — see constructor note on
+    // why a sessionStorage version of this isn't needed once the singleton
+    // guard in initApplication() rules out multiple concurrent instances.
     if (serialized === this.lastSentPayload) {
       return;
     }
     this.lastSentPayload = serialized;
-    try {
-      sessionStorage.setItem(this.lastSentPayloadStorageKey, serialized);
-    } catch (error) {
-      // sessionStorage unavailable (e.g. private browsing mode) — dedup guard
-      // falls back to in-memory-only protection for this instance's lifetime.
-    }
 
     var _hsq = (window._hsq = window._hsq || []);
     _hsq.push([
@@ -1039,24 +1045,57 @@ export default class Application {
 }
 
 export function initApplication() {
+  // BUG FIX: singleton guard. If something causes this tracking script to
+  // execute more than once on a single page load (a real, confirmed failure
+  // mode on a live client implementation — most likely candidate there was a
+  // GTM trigger/tag firing more than once for what should be a single page
+  // view, though the exact root cause wasn't pinned down), initApplication()
+  // would otherwise construct a second, fully independent Application
+  // instance: its own setInterval, its own DOM observer, its own event
+  // listeners, its own in-memory dedup guard. Two instances tracking the
+  // same page independently produces repeated identical-payload events.
+  //
+  // IMPORTANT: this must be a window-scoped property, NOT the module-scoped
+  // `gha_application` export below. If the script runs twice, each run gets
+  // its OWN independent module scope — only something explicitly attached
+  // to `window` (the one truly shared global per page) is visible across
+  // both executions. Checking the export itself would not catch this.
+  //
+  // A real page navigation naturally clears this (window itself gets torn
+  // down), so this only blocks duplicate instances within the SAME page
+  // load — it does not interfere with legitimate re-initialization on a
+  // genuinely new page.
+  // TODO: consider namespacing this per client (e.g.
+  // __<clientName>TrackingInstance) if there's ever a realistic chance of
+  // two different clients' tracking scripts loading on the same page/domain.
+  if (window.__onlineAppTrackingInstance) {
+    return window.__onlineAppTrackingInstance;
+  }
+
   // TODO: Update DOM selector to obtain application type.
   let loanType =
     document.getElementById("hdnLoanType") ||
     document.getElementById("hdLoanType");
   if (!loanType) return null;
 
-  // TODO: Update mapAppType keys to match internal application type names.
-  // WARNING: don't assume this is a numeric scheme (1, 2, 3...) just because
-  // the placeholder below uses numbers — this caused a real, confirmed bug on
-  // a live client implementation. MeridianLink LoansPQ's hdLoanType/
-  // hdnLoanType DOM value is commonly a short STRING code instead (e.g. XA,
-  // PL, VL, CC, HE) depending on the client's specific setup. If the keys
-  // here don't match the actual runtime value's type/format exactly,
-  // mapAppType[loanType.value] will silently miss every time and
-  // initApplication() will always return null — with no error, just quietly
+  // TODO: Confirm mapAppType keys against this client's actual live
+  // hdLoanType/hdnLoanType DOM value before going live — do not assume the
+  // consumer codes below are universal without checking.
+  // XA/PL/VL/CC/HE are confirmed, consistent MeridianLink LoansPQ string
+  // codes for consumer deposit/loan/vehicle/credit-card/equity applications
+  // (confirmed on a live LoansPQ implementation) — this template being
+  // specifically for LoansPQ (not Access or another MeridianLink platform),
+  // these five are a reasonable starting default rather than a guess.
+  // consumer_real_estate and all commercial_* entries remain numeric
+  // placeholders — these have NOT been confirmed against a live instance.
+  // WARNING: don't assume any of these are correct without checking. A
+  // mismatch here — string vs. number, or the wrong code entirely — causes
+  // mapAppType[loanType.value] to silently miss every time, and
+  // initApplication() will always return null with no error, just quietly
   // never initializing. Confirm the actual live value (e.g. via console:
-  // document.getElementById("hdnLoanType").value) before assuming either
-  // convention.
+  // document.getElementById("hdnLoanType").value) for EVERY application
+  // type this client actually supports before assuming any entry below,
+  // string or numeric, is correct as-is.
   // NOTE: if this client does not offer business/commercial applications
   // online, the commercial_* entries below will simply never resolve to a
   // match (no live loanType value routes to them) — that's fine, leave them
@@ -1069,13 +1108,13 @@ export function initApplication() {
     VL: "consumer_vehicle",
     CC: "consumer_credit_card",
     HE: "consumer_equity",
-    6: "consumer_real_estate",
-    7: "commercial_deposit",
-    8: "commercial_loan",
-    9: "commercial_vehicle",
-    10: "commercial_credit_card",
-    11: "commercial_equity",
-    12: "commercial_real_estate",
+    6: "consumer_real_estate", // TODO: confirm actual code, not yet observed on a live instance
+    7: "commercial_deposit", // TODO: confirm actual code
+    8: "commercial_loan", // TODO: confirm actual code
+    9: "commercial_vehicle", // TODO: confirm actual code
+    10: "commercial_credit_card", // TODO: confirm actual code
+    11: "commercial_equity", // TODO: confirm actual code
+    12: "commercial_real_estate", // TODO: confirm actual code
   };
 
   let appType = mapAppType[loanType.value];
@@ -1096,7 +1135,7 @@ export function initApplication() {
       return null;
     }
 
-    return new Application(appType);
+    return (window.__onlineAppTrackingInstance = new Application(appType));
   } else {
     return null;
   }
