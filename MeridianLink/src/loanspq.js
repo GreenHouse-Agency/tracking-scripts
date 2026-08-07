@@ -960,32 +960,38 @@ export default class Application {
   createNextButtonEventListener() {
     // TODO: Update the selector to match the next/continue button in the POS.
     //
-    // Uses a single delegated listener on document (matching the pattern
-    // used in the Reading MortgageBot implementation) rather than
-    // querySelectorAll + forEach + addEventListener on specific elements.
-    // Reading's stated reason was AngularJS re-rendering the DOM on every
-    // route change, meaning direct listeners couldn't be attached once and
-    // expected to survive — but delegation is a good default regardless of
-    // platform, since it structurally can't stack duplicate listeners on a
-    // given element no matter the cause. Leaders' implementation hit the
-    // same "many identical sends from one click" symptom via a different
-    // mechanism (repeated listener re-registration from inside a
-    // MutationObserver callback) — delegation avoids that entire class of
-    // bug by construction.
+    // Direct addEventListener on the matched button element(s), NOT event
+    // delegation on document. Delegation was tried on a live client
+    // implementation as a structural safeguard against duplicate-listener
+    // stacking, but relies on the click event bubbling up to document — if
+    // the POS's own inline onclick validation handler calls
+    // stopPropagation() before a delegated listener sees the event, the
+    // handler never fires at all, not just late. This was suspected (not
+    // fully confirmed — no visibility into that platform's own validation
+    // JS) to explain a live drop in completed-application events and at
+    // least one session missing a key field entirely after switching to
+    // delegation. Multiple listeners on the SAME element (as direct binding
+    // uses) are unaffected by stopPropagation() — that only blocks further
+    // bubbling to ancestors, not other listeners already attached to the
+    // same node.
     //
     // TODO: confirm whether this client's "next" button selector is also
     // used by unrelated elements (e.g. popup/modal dialog buttons) —
     // confirmed happening on a live client implementation, where the same
     // class was reused on "OK"/"Remove"/"Cancel" buttons inside confirmation
-    // dialogs. If so, scope the closest() check below to a container that
-    // only wraps the real navigation button (e.g. a footer/nav element) so
-    // dismissing a dialog isn't misread as advancing to the next step.
-    document.addEventListener("click", (event) => {
-      const button = event.target.closest(".div-continue-button");
-      if (button) {
-        this.handleNextButtonClick(event);
-      }
-    });
+    // dialogs. If so, scope the selector below to a container that only
+    // wraps the real navigation button (e.g. a footer/nav element, such as
+    // '[data-role="footer"] .div-continue-button') so dismissing a dialog
+    // isn't misread as advancing to the next step, rather than reaching for
+    // delegation to solve it.
+    const nextButton = document.querySelectorAll(".div-continue-button");
+    if (nextButton.length > 0) {
+      nextButton.forEach((button) => {
+        button.addEventListener("click", this.handleNextButtonClick.bind(this));
+      });
+    } else {
+      console.warn("Next button not found. Please check the selector.");
+    }
   }
 
   handleNextButtonClick(event) {
@@ -1073,9 +1079,7 @@ export function initApplication() {
   }
 
   // TODO: Update DOM selector to obtain application type.
-  let loanType =
-    document.getElementById("hdnLoanType") ||
-    document.getElementById("hdLoanType");
+  let loanType = document.getElementById("hdnLoanType") || document.getElementById("hdLoanType");
   if (!loanType) return null;
 
   // TODO: Confirm mapAppType keys against this client's actual live
