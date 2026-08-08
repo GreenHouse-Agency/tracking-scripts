@@ -742,7 +742,28 @@ export default class Application {
 
           const oldValue = this.fields.furthest_step_viewed.value;
           const newValue = object[field.objectPropertyName];
-          if (stagePath[newValue] > stagePath[oldValue]) {
+
+          // BUG FIX: force "Application Completed" whenever appSubmitted()
+          // is true, regardless of what the platform's own stage/status
+          // value returns. Confirmed on a live client implementation:
+          // furthest_step_viewed was getting stuck at "Review and Submit"
+          // on genuinely completed applications (application_id and
+          // submitted both correctly populated in that same event), even
+          // though the applicant had reached the completed-page URL. Root
+          // cause not fully pinned down on that client — either the
+          // platform's own stage text didn't exactly match the hardcoded
+          // "Application Completed" string, or there was a timing gap
+          // where that value hadn't updated yet on the very first pass
+          // after arriving at the page — but since appSubmitted() is
+          // already trusted enough to base submitted/closeApplication on
+          // it, using that same signal here sidesteps needing to diagnose
+          // which explanation applies for a given client. Always safe to
+          // force forward: "Application Completed" is the highest stage in
+          // stagePath, so this can never regress furthest_step_viewed to
+          // an earlier stage.
+          if (this.appSubmitted()) {
+            value = "Application Completed";
+          } else if (stagePath[newValue] > stagePath[oldValue]) {
             value = newValue;
           } else {
             value = oldValue;
