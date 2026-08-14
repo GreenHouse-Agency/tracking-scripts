@@ -109,6 +109,28 @@ export default class Application {
         selector: null,
         value: null,
       },
+      // TODO: verify each of these selectors actually holds the live value
+      // on this client's instance, not just that the element exists.
+      // TODO: confirm getCurrentAppInfo() property names for this client's
+      // product types before relying on the amount special case in
+      // getFieldValue() (key === "amount") — LoanAmount/ProposedLoanAmount
+      // were confirmed for personal/vehicle loans on a live LoansPQ
+      // implementation, don't assume these generalize. That special case
+      // checks those properties FIRST, falling back to the DOM selector
+      // list below only if neither has a value.
+      // WARNING: confirmed real bug on a live implementation — a loan
+      // amount field can exist as a legacy/hidden decoy sitting alongside
+      // the actual active input (different id, sometimes randomized),
+      // where a page script that's supposed to sync the visible field's
+      // value into the legacy one is blocked under certain conditions
+      // (e.g. non-SSO sessions) — leaving the legacy field permanently
+      // empty while the applicant's real entry sits elsewhere. Since DOM
+      // fallback selectors are tried in order (see getQuerySelectorValue()),
+      // first one with an actual value wins — if this client has a similar
+      // pattern and no getCurrentAppInfo() property is available, list the
+      // reliable/active field's selector FIRST and keep legacy IDs as
+      // fallback after it — don't assume the first selector that matches
+      // an element is the one actually holding the value.
       amount: {
         type: "number",
         locator: "query",
@@ -562,7 +584,7 @@ export default class Application {
 
     for (const [key, field] of Object.entries(this.fields)) {
       const oldValue = field.value;
-      let newValue = this.getFieldValue(field);
+      let newValue = this.getFieldValue(field, key);
 
       // if the value has changed and the new value is not null or undefined, update the field value
       if (
@@ -655,9 +677,83 @@ export default class Application {
   // Retrieves the value of a field based on its locator type
   // If the field is an object, it retrieves the value from the object property
   // If the field is a query, it retrieves the value from a querySelector
-  getFieldValue(field) {
+  getFieldValue(field, key) {
     var value = null;
     var object = null;
+
+    // TODO: confirm getCurrentAppInfo() property names for this client's
+    // product types before relying on these — LoanAmount (personal loans),
+    // ProposedLoanAmount (vehicle loans), and RequestedLoanAmount (home
+    // equity) were confirmed on a live LoansPQ implementation; don't assume
+    // these generalize without checking on this client's instance. If
+    // confirmed, function-based values have proven more reliable than DOM
+    // selectors for amount specifically: a live client implementation had a
+    // legacy hidden DOM field alongside the actual active input, with a
+    // page script that was supposed to sync the visible field's value into
+    // the legacy one blocked under certain session conditions — leaving
+    // the legacy field permanently empty even when the applicant had
+    // entered a value. getCurrentAppInfo() reads the platform's actual
+    // underlying data rather than a DOM element that may or may not have
+    // been synced correctly.
+    // Deposit-type applications may not have a single amount property at
+    // all — on the confirmed LoansPQ implementation, deposit amount only
+    // existed as a per-product depositAmount value inside a
+    // SelectedProducts JSON array (the same source deposit_products parses
+    // elsewhere for labels), requiring a sum across all selected products
+    // rather than a direct property read. Check whether this client's
+    // deposit flow has an equivalent structure before assuming a single
+    // property will work the same way it does for loan types.
+    // Falls back to the DOM selector chain (amount field's selector list)
+    // if nothing usable is found via getCurrentAppInfo().
+    if (key === "amount") {
+      const appInfo =
+        typeof getCurrentAppInfo === "function" ? getCurrentAppInfo() : null;
+
+      // TODO: confirm this client's deposit-type SelectedProducts (or
+      // equivalent) property name and shape before relying on this — see
+      // comment above. Summing depositAmount across all selected products;
+      // guarding on totalDepositAmount > 0 avoids returning a misleading 0
+      // when nothing has actually been entered yet.
+      if (appInfo && typeof appInfo.SelectedProducts === "string") {
+        try {
+          const selectedProducts = JSON.parse(appInfo.SelectedProducts);
+          const totalDepositAmount = selectedProducts.reduce(
+            (sum, product) => sum + (Number(product.depositAmount) || 0),
+            0
+          );
+          if (totalDepositAmount > 0) {
+            return this.formatFieldValue(
+              totalDepositAmount,
+              field.type,
+              field.options
+            );
+          }
+        } catch (error) {
+          console.error(`Error parsing SelectedProducts for amount: ${error}`);
+        }
+      }
+
+      const amountProperties = [
+        "LoanAmount",
+        "ProposedLoanAmount",
+        "RequestedLoanAmount",
+        "RequestAmount",
+      ];
+      for (const prop of amountProperties) {
+        if (appInfo && appInfo[prop]) {
+          return this.formatFieldValue(
+            appInfo[prop],
+            field.type,
+            field.options
+          );
+        }
+      }
+      return this.formatFieldValue(
+        this.getQuerySelectorValue(field.selector),
+        field.type,
+        field.options
+      );
+    }
 
     if (field.locator === "function" || field.locator === "object") {
       if (field.locator === "function") {
@@ -789,14 +885,39 @@ export default class Application {
         }
       }
     } else if (field.locator === "query") {
-      const element = document.querySelector(field.selector);
-
-      if (element) {
-        value = element.value || element.innerText;
-      }
+      value = this.getQuerySelectorValue(field.selector);
     }
 
     return this.formatFieldValue(value, field.type, field.options);
+  }
+
+  // Splits a comma-separated selector list and tries each individually, IN
+  // THE ORDER LISTED, taking the first one that actually has a non-empty
+  // value/innerText — not just the first one present in the DOM (which is
+  // what a single document.querySelector(selectorList) call would return,
+  // regardless of list order). Confirmed real problem on a live client
+  // implementation's loan amount field: the POS rendered a legacy
+  // hidden/decoy field alongside the actual active input, and a page
+  // script meant to sync the visible input's value into the legacy field
+  // was blocked under certain session conditions — leaving the legacy
+  // field permanently empty on the page while the applicant's real entry
+  // sat in a different element. This lets a field's selector list express
+  // real fallback priority instead of being at the mercy of DOM ordering.
+  // TODO: if this client's POS has a similar legacy-decoy-field problem for
+  // any query-locator field, list the reliable/active selector FIRST in
+  // that field's selector string and keep legacy IDs as fallback after it.
+  getQuerySelectorValue(selectorString) {
+    const selectors = selectorString.split(",").map((s) => s.trim());
+    for (const selector of selectors) {
+      const element = document.querySelector(selector);
+      if (element) {
+        const candidateValue = element.value || element.innerText;
+        if (candidateValue) {
+          return candidateValue;
+        }
+      }
+    }
+    return null;
   }
 
   executeFunction(func) {
@@ -841,13 +962,24 @@ export default class Application {
 
   // Helper function to convert a string to a number, or return null if conversion fails
   convertToNumber(value) {
-    var newValue = null;
+    // BUG FIX: previously only handled string input — typeof value ===
+    // "string" was false for a raw JS number, so newValue never got set
+    // and this silently returned null even for a perfectly valid number.
+    // Matters for any numeric value computed in code (e.g. a summed total)
+    // rather than read directly off a DOM element as a string.
+    if (value === null || value === undefined || value === "") return null;
 
-    if (value && typeof value === "string") {
-      newValue = parseFloat(value.replace(/^\$\s*/, "").replace(/,/g, ""));
+    if (typeof value === "number") {
+      return isNaN(value) ? null : value;
     }
 
-    return isNaN(newValue) ? null : newValue;
+    const parsed = parseFloat(
+      value
+        .toString()
+        .replace(/^\$\s*/, "")
+        .replace(/,/g, "")
+    );
+    return isNaN(parsed) ? null : parsed;
   }
 
   // Helper function to convert a string to a bool-as-string, or return null if conversion fails
