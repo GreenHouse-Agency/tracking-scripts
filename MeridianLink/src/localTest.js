@@ -24,7 +24,7 @@ function loadAppTracker() {
     appScript.id = 'gha-ml-script';
     appScript.async = true;
     appScript.defer = true;
-    appScript.src = 'https://js.ghagency.com/hubfs/scripts/48766625/ml.js';
+    appScript.src = 'https://js.ghagency.com/hubfs/scripts/48766625/pos.js';
     appScript.type = 'text/javascript';
     document.head.appendChild(appScript);
 }

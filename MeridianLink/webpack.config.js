@@ -1,12 +1,12 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/base.js',
   output: {
     filename: 'pos.js',
     path: path.resolve(__dirname, 'dist'),
     library: {
-      name: 'ghaMLTracker',
+      name: 'ghaPOSTracker',
       type: 'var',
     },
   },

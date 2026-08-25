@@ -43,7 +43,7 @@ export default class Application {
       "first_name": {
         "type": "string",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "FirstName",
         "selector": null,
@@ -52,7 +52,7 @@ export default class Application {
       "last_name": {
         "type": "string",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "LastName",
         "selector": null,
@@ -61,7 +61,7 @@ export default class Application {
       "email": {
         "type": "string",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "EmailAddr",
         "selector": null,
@@ -70,7 +70,7 @@ export default class Application {
       "cell_phone": {
         "type": "phone",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "MobilePhone",
         "selector": null,
@@ -79,7 +79,7 @@ export default class Application {
       "home_phone": {
         "type": "phone",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "HomePhone",
         "selector": null,
@@ -88,7 +88,7 @@ export default class Application {
       "work_phone": {
         "type": "phone",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "WorkPhone",
         "selector": null,
@@ -97,7 +97,7 @@ export default class Application {
       "preferred_contact_method": {
         "type": "dropdown",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "ContactMethod",
         "selector": null,
@@ -124,7 +124,7 @@ export default class Application {
       "new_member_application": {
         "type": "bool",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "type",
         "selector": null,
@@ -133,7 +133,7 @@ export default class Application {
       "youth_account": {
         "type": "bool",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "saAccountCode",
         "selector": null,
@@ -160,7 +160,7 @@ export default class Application {
       "eligibility": {
         "type": "string",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "FOMName",
         "selector": null,
@@ -169,7 +169,7 @@ export default class Application {
       "deposit_products": {
         "type": "enum",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "SelectedProducts",
         "selector": null,
@@ -178,7 +178,7 @@ export default class Application {
       "application_purpose": {
         "type": "string",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "LoanPurpose",
         "selector": null,
@@ -187,7 +187,7 @@ export default class Application {
       "credit_card_name": {
         "type": "string",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "CreditCardName",
         "selector": null,
@@ -196,7 +196,7 @@ export default class Application {
       "vehicle_type": {
         "type": "string",
         "locator": "function",
-				"function": "getCurrentAppInfo",
+        "function": "getCurrentAppInfo",
         "objectLocation": "root",
         "objectPropertyName": "VehicleType",
         "selector": null,
@@ -205,7 +205,7 @@ export default class Application {
       "furthest_step_viewed": {
         "type": "string",
         "locator": "function",
-				"function": "currentURL",
+        "function": "currentURL",
         "objectLocation": "root",
         "objectPropertyName": "stage",
         "selector": null,
@@ -671,11 +671,11 @@ export function initApplication() {
   if (!loanType) return null;
 
   let mapAppType = {
-    "1": "consumer_deposit",
-    "2": "consumer_loan",
-    "3": "consumer_vehicle",
-    "4": "consumer_credit_card",
-    "5": "consumer_equity",
+    "XA": "consumer_deposit",
+    "PL": "consumer_loan",
+    "VL": "consumer_vehicle",
+    "CC": "consumer_credit_card",
+    "HE": "consumer_equity",
     "6": "consumer_real_estate",
     "7": "commercial_deposit",
     "8": "commercial_loan",
